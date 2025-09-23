@@ -13,8 +13,7 @@ editor: visual
 :::
 
 ::: {style="text-align: center;"}
-An aspiring data analyst who is currently pursuing a master's in 
-data analytics engineering at George Mason University.
+An aspiring data analyst who is currently pursuing a master's in<br> data analytics engineering at George Mason University.
 
 [LinkedIn](https://www.linkedin.com/in/hiba-m-awan) \| [GitHub](https://github.com/hiba-awan)
 
