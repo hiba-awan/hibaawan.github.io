@@ -1,0 +1,17 @@
+---
+title: "Home"
+format: html
+editor: visual
+---
+
+::: {style="text-align: center;"}
+![](hello_kitty.png){width="300px"}
+:::
+
+::: {style="font-size: 85px; text-align: center; font-weight: bold;"}
+Hi, I'm [Hiba]{style="color: rgb(245,0,38);"}!
+:::
+
+::: {style="font-size: 85px; text-align: center; font-weight: bold;"}
+Welcome to my portfolio
+:::

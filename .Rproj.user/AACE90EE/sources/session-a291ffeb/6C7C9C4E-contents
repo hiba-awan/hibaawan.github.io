@@ -1,0 +1,11 @@
+project: 
+  type: website
+  output-dir: docs
+  
+website: 
+  title: "Hiba Awan"
+  navbar: 
+   left: 
+     - index.qmd
+     - about.qmd
+

@@ -1,0 +1,23 @@
+---
+title: "About Me"
+format: html
+editor: visual
+---
+
+::: {style="text-align: center;"}
+![](about_pic.jpg){width="300px" style="border-radius: 50%;"}
+:::
+
+::: {style="font-size: 40px; text-align: center;"}
+**Hiba Awan**
+:::
+
+::: {style="text-align: center;"}
+[LinkedIn](https://www.linkedin.com/in/hiba-m-awan) \| [GitHub](https://github.com/hiba-awan)
+
+Email: hiba.m.awan\@gmail.com
+
+Phone Number: 703-927-8854
+
+[Download my resume](resume.pdf)
+:::
