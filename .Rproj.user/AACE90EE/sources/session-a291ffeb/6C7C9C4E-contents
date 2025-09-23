@@ -8,4 +8,6 @@ website:
    left: 
      - index.qmd
      - about.qmd
+     - proj1.qmd
+     - proj2.qmd
 
