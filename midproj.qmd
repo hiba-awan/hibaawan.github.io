@@ -1,0 +1,111 @@
+---
+title: "Mid Project"
+author: "Hiba Awan"
+format: html
+editor: visual
+---
+
+## Introduction
+
+The following visualization I will be re-imagining is from an article on the effects of the 2018-2019 government shutdown. Within each of the federal departments, there is a contingency plan ready in case of a shutdown. Within this plan, there are some essential employees who must continue working through the shutdown with or without pay. The remaining employees who are deemed nonessential within the plan, are "furloughed' and are told to go on unpaid leave until the shutdown is over. The following chart shows the furloughed rates at different departments (with scaling i'm assuming is according to the size of the department):
+
+::: {style="text-align: center;"}
+![](chart.png)
+:::
+
+There are a number of issues with the following visualization:
+
+-   A lack of rhyme or reason with the random placement of the departments throughout the visualization; doesn't seem to be an alphabetical, categorical, or value-based reasoning for the placement of the boxes.
+
+-   It isn't clearly indicated whether the boxes are scaled by the population or size of the department (I could only assume based on an earlier visualization containing the departments).
+
+-   The color contrast between the two groups is too subtle.
+
+-   The grid pattern within the boxes doesn't add anything meaningful and distracts from the percentages.
+
+-   Each department's different layout and area makes it difficult to compare them.
+
+Overall, this visualization is an overly complex design for a simple message.
+
+   
+
+## Redesign 1: Bar Chart of Furlough Percentage Rates among Federal Departments
+
+When previously mention the message was over-complexly represented by the original design, I was referring to the furlough rates. And for this reason, my first redesign of the visualization was a straightforward bar chart which depicts the furlough rates of each federal department:
+
+   
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+library(plotly)
+
+# Load data
+data <- read.csv("Federal_Furlough.csv")
+data <- na.omit(data)
+data <- data[data$FED_DEP != "FCC", ]
+
+
+# Sort by furlough rate descending
+data <- data[order(data$FURLOUGHED_RATE, decreasing = FALSE), ]
+
+# Horizontal bar chart
+plot_ly(data,
+        y = ~factor(FED_DEP, levels = data$FED_DEP),
+        x = ~FURLOUGHED_RATE,
+        type = 'bar',
+        orientation = 'h',
+        marker = list(color = "#0072B2")) %>%
+  layout(title = 'Furlough Rates by Federal Department',
+         xaxis = list(title = 'Percentage of Employees Furloughed'),
+         yaxis = list(title = list(text = 'Federal Departments',
+                                   standoff = 20)),
+         margin = list(l = 200))  # Make room for long department names
+```
+
+This chart shows that furloughs aren't uniformly distributed across federal departments. The departments which were civil-service heavy or generally had non-essential functions, like the National Science foundation, environmental protection agency, and NASA, had the highest furlough rates (well above 70%). On the other hand, departments considered essential, like homeland security, department of justice, and the department of transportation, were least effected with the lowest furlough rates. This difference in priority shown within the visualization challenges the idea of almost all government jobs having high security.
+
+   
+
+## Redesign 2: Grouped Bar Chart of the Furloughed and Still-Working Employees by Federal Department
+
+For the second visualization, I tried to include all the data that was shown within the original chart by including the working employee percentages as well. The values weren't explicitly displayed in the originals, so I derived them using the given furloughed percentages when extracting the data.
+
+   
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Reorder departments by furlough rate (descending)
+data <- data[order(data$FURLOUGHED_RATE, decreasing = TRUE), ]
+
+# Create horizontal stacked bar chart
+plot_ly(data, y = ~FED_DEP, x = ~FURLOUGHED_RATE, type = 'bar', orientation = 'h',
+        name = 'Furloughed', marker = list(color = '#0072B2')) %>%
+  add_trace(x = ~WORKING_RATE, name = 'Working with or without pay', orientation = 'h',
+            marker = list(color = '#D55E00')) %>%
+  plotly::layout(
+    barmode = 'stack',
+    xaxis = list(
+      title = list(text = 'Percentage of Employees', standoff = 10)  # extra spacing
+    ),
+    yaxis = list(
+      title = list(text = 'Federal Departments', standoff = 20),
+      categoryorder = 'total ascending'
+    ),
+    legend = list(
+      title = list(text = "Employee Status"),  # legend title
+      orientation = 'h',                        # horizontal legend
+      x = 0.3,                                   # horizontal position
+      y = -0.2                                   # below plot
+    ),
+    title = 'Furloughed vs. Working Employees by Federal Department'
+  )
+
+```
+
+Including the working employees percentage adds another scope of analysis for the furloughing situation. The perspective shifts from "how badly each department was effected" to a full department approach to the government shutdown. Though many employees from the non-essential departments were on furlough, they still maintained their status of hired until the shutdown ended and were not to work during this time. The prioritized departments like homeland security, justice, etc, were to continue their operations with or without pay until the shutdown ended. Seeing the high percentages of employees working through the shutdown offers a new perspective on the roles of certain government employees and their commitment during times of uncertainty.
+
+   
+
+{{< video https://youtu.be/cDEy_fk-_rc >}}
+
+## Reference
+
+Zarracina, J., & Zhou, L. (2019, January 12). The astonishing effects of the shutdown, in 8 charts. Vox. https://www.vox.com/policy-and-politics/2019/1/11/18177101/government-shutdown-longest-workers-agencies-charts

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Home – Hiba Awan</title>
+<title>Mid Project - Code – Hiba Awan</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -66,6 +100,15 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 
 </head>
@@ -88,7 +131,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
@@ -100,7 +143,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Mid Project</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./midprojcode.html"> 
+    <a class="nav-link active" href="./midprojcode.html" aria-current="page"> 
 <span class="menu-text">Mid Project - Code</span></a>
   </li>  
   <li class="nav-item">
@@ -128,7 +171,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Home</h1>
+<h1 class="title">Mid Project - Code</h1>
 </div>
 
 
@@ -145,17 +188,94 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div style="text-align: center;">
-<p><img src="hello_kitty.png" class="img-fluid" width="300"></p>
+<section id="redesign-1-code" class="level2">
+<h2 class="anchored" data-anchor-id="redesign-1-code">Redesign 1 Code:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ggplot2</code></pre>
 </div>
-<div style="font-size: 82px; text-align: center; font-weight: bold;">
-<p>Hi, I’m <span style="color: rgb(245,0,38);">Hiba</span>!</p>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'plotly'</code></pre>
 </div>
-<div style="font-size: 82px; text-align: center; font-weight: bold;">
-<p>Welcome to my portfolio</p>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ggplot2':
+
+    last_plot</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:graphics':
+
+    layout</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"Federal_Furlough.csv"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(data)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>FED_DEP <span class="sc">!=</span> <span class="st">"FCC"</span>, ]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by furlough rate descending</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[<span class="fu">order</span>(data<span class="sc">$</span>FURLOUGHED_RATE, <span class="at">decreasing =</span> <span class="cn">FALSE</span>), ]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Horizontal bar chart</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ly</span>(data,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="sc">~</span><span class="fu">factor</span>(FED_DEP, <span class="at">levels =</span> data<span class="sc">$</span>FED_DEP),</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="sc">~</span>FURLOUGHED_RATE,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="st">'bar'</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">orientation =</span> <span class="st">'h'</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">"#0072B2"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(<span class="at">title =</span> <span class="st">'Furlough Rates by Federal Department'</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'Percentage of Employees Furloughed'</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">'Federal Departments'</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">standoff =</span> <span class="dv">20</span>)),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">margin =</span> <span class="fu">list</span>(<span class="at">l =</span> <span class="dv">200</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-1643b646cbf41003a0f5" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-1643b646cbf41003a0f5">{"x":{"visdat":{"146371fb374e6":["function () ","plotlyVisDat"]},"cur_data":"146371fb374e6","attrs":{"146371fb374e6":{"y":{},"x":{},"orientation":"h","marker":{"color":"#0072B2"},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":200,"t":25,"r":10},"title":"Furlough Rates by Federal Department","xaxis":{"domain":[0,1],"automargin":true,"title":"Percentage of Employees Furloughed"},"yaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Federal Departments","standoff":20},"type":"category","categoryorder":"array","categoryarray":["OPM","Homeland Security","Justice","Transportation","GSA","USAID","NARA","Peace Corps","EOP","SBA","Agriculture","Interior","FTC","Treasury","EEOC","Commerce","SEC","Housing & Urban Development","NASA","EPA","NSF"]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"y":["OPM","Homeland Security","Justice","Transportation","GSA","USAID","NARA","Peace Corps","EOP","SBA","Agriculture","Interior","FTC","Treasury","EEOC","Commerce","SEC","Housing & Urban Development","NASA","EPA","NSF"],"x":[9.8000000000000007,14.699999999999999,16,37.200000000000003,50,51.399999999999999,61.299999999999997,61.899999999999999,61.899999999999999,64.900000000000006,66.5,76,76.700000000000003,83.299999999999997,84.5,86,93.5,95,95,95,97],"orientation":"h","marker":{"color":"#0072B2","line":{"color":"rgba(31,119,180,1)"}},"type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="redesign-2-code" class="level2">
+<h2 class="anchored" data-anchor-id="redesign-2-code">Redesign 2 Code:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reorder departments by furlough rate (descending)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[<span class="fu">order</span>(data<span class="sc">$</span>FURLOUGHED_RATE, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create horizontal stacked bar chart</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ly</span>(data, <span class="at">y =</span> <span class="sc">~</span>FED_DEP, <span class="at">x =</span> <span class="sc">~</span>FURLOUGHED_RATE, <span class="at">type =</span> <span class="st">'bar'</span>, <span class="at">orientation =</span> <span class="st">'h'</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">name =</span> <span class="st">'Furloughed'</span>, <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'#0072B2'</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_trace</span>(<span class="at">x =</span> <span class="sc">~</span>WORKING_RATE, <span class="at">name =</span> <span class="st">'Working with or without pay'</span>, <span class="at">orientation =</span> <span class="st">'h'</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'#D55E00'</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  plotly<span class="sc">::</span><span class="fu">layout</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">barmode =</span> <span class="st">'stack'</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">xaxis =</span> <span class="fu">list</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">'Percentage of Employees'</span>, <span class="at">standoff =</span> <span class="dv">10</span>)  <span class="co"># extra spacing</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">yaxis =</span> <span class="fu">list</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">'Federal Departments'</span>, <span class="at">standoff =</span> <span class="dv">20</span>),</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">categoryorder =</span> <span class="st">'total ascending'</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend =</span> <span class="fu">list</span>(</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">"Employee Status"</span>),</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">orientation =</span> <span class="st">'h'</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="fl">0.3</span>, </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">'Furloughed vs. Working Employees by Federal Department'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-0689587626289dbc507d" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-0689587626289dbc507d">{"x":{"visdat":{"146375a06b402":["function () ","plotlyVisDat"]},"cur_data":"146375a06b402","attrs":{"146375a06b402":{"y":{},"x":{},"orientation":"h","marker":{"color":"#0072B2"},"name":"Furloughed","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"146375a06b402.1":{"y":{},"x":{},"orientation":"h","marker":{"color":"#D55E00"},"name":"Working with or without pay","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"barmode":"stack","xaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Percentage of Employees","standoff":10}},"yaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Federal Departments","standoff":20},"categoryorder":"total ascending","type":"category","categoryarray":["Agriculture","Commerce","EEOC","EOP","EPA","FTC","GSA","Homeland Security","Housing & Urban Development","Interior","Justice","NARA","NASA","NSF","OPM","Peace Corps","SBA","SEC","Transportation","Treasury","USAID"]},"legend":{"title":{"text":"Employee Status"},"orientation":"h","x":0.29999999999999999,"y":-0.20000000000000001},"title":"Furloughed vs. Working Employees by Federal Department","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"y":["NSF","Housing & Urban Development","NASA","EPA","SEC","Commerce","EEOC","Treasury","FTC","Interior","Agriculture","SBA","Peace Corps","EOP","NARA","USAID","GSA","Transportation","Justice","Homeland Security","OPM"],"x":[97,95,95,95,93.5,86,84.5,83.299999999999997,76.700000000000003,76,66.5,64.900000000000006,61.899999999999999,61.899999999999999,61.299999999999997,51.399999999999999,50,37.200000000000003,16,14.699999999999999,9.8000000000000007],"orientation":"h","marker":{"color":"#0072B2","line":{"color":"rgba(31,119,180,1)"}},"name":"Furloughed","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"y":["NSF","Housing & Urban Development","NASA","EPA","SEC","Commerce","EEOC","Treasury","FTC","Interior","Agriculture","SBA","Peace Corps","EOP","NARA","USAID","GSA","Transportation","Justice","Homeland Security","OPM"],"x":[3,5,5,5,6.5,14,15.5,16.699999999999999,23.300000000000001,24,33.5,35.100000000000001,38.100000000000001,38.100000000000001,38.700000000000003,48.600000000000001,50,62.799999999999997,84,85.299999999999997,90.200000000000003],"orientation":"h","marker":{"color":"#D55E00","line":{"color":"rgba(255,127,14,1)"}},"name":"Working with or without pay","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

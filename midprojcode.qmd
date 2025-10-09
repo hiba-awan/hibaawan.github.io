@@ -1,0 +1,62 @@
+---
+title: "Mid Project - Code"
+format: html
+editor: visual
+---
+
+## Redesign 1 Code:
+
+```{r}
+library(plotly)
+
+# Load data
+data <- read.csv("Federal_Furlough.csv")
+data <- na.omit(data)
+data <- data[data$FED_DEP != "FCC", ]
+
+
+# Sort by furlough rate descending
+data <- data[order(data$FURLOUGHED_RATE, decreasing = FALSE), ]
+
+# Horizontal bar chart
+plot_ly(data,
+        y = ~factor(FED_DEP, levels = data$FED_DEP),
+        x = ~FURLOUGHED_RATE,
+        type = 'bar',
+        orientation = 'h',
+        marker = list(color = "#0072B2")) %>%
+  layout(title = 'Furlough Rates by Federal Department',
+         xaxis = list(title = 'Percentage of Employees Furloughed'),
+         yaxis = list(title = list(text = 'Federal Departments',
+                                   standoff = 20)),
+         margin = list(l = 200))
+```
+
+## Redesign 2 Code:
+
+```{r}
+# Reorder departments by furlough rate (descending)
+data <- data[order(data$FURLOUGHED_RATE, decreasing = TRUE), ]
+
+# Create horizontal stacked bar chart
+plot_ly(data, y = ~FED_DEP, x = ~FURLOUGHED_RATE, type = 'bar', orientation = 'h',
+        name = 'Furloughed', marker = list(color = '#0072B2')) %>%
+  add_trace(x = ~WORKING_RATE, name = 'Working with or without pay', orientation = 'h',
+            marker = list(color = '#D55E00')) %>%
+  plotly::layout(
+    barmode = 'stack',
+    xaxis = list(
+      title = list(text = 'Percentage of Employees', standoff = 10)  # extra spacing
+    ),
+    yaxis = list(
+      title = list(text = 'Federal Departments', standoff = 20),
+      categoryorder = 'total ascending'
+    ),
+    legend = list(
+      title = list(text = "Employee Status"),
+      orientation = 'h',
+      x = 0.3, 
+      y = -0.2
+    ),
+    title = 'Furloughed vs. Working Employees by Federal Department')
+```

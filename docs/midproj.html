@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Hiba Awan">
 
-<title>Home – Hiba Awan</title>
+<title>Mid Project – Hiba Awan</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -66,6 +67,15 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 
 </head>
@@ -88,7 +98,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
@@ -96,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">About Me</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./midproj.html"> 
+    <a class="nav-link active" href="./midproj.html" aria-current="page"> 
 <span class="menu-text">Mid Project</span></a>
   </li>  
   <li class="nav-item">
@@ -128,13 +138,19 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Home</h1>
+<h1 class="title">Mid Project</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Hiba Awan </p>
+          </div>
+  </div>
     
   
     
@@ -145,17 +161,56 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>The following visualization I will be re-imagining is from an article on the effects of the 2018-2019 government shutdown. Within each of the federal departments, there is a contingency plan ready in case of a shutdown. Within this plan, there are some essential employees who must continue working through the shutdown with or without pay. The remaining employees who are deemed nonessential within the plan, are “furloughed’ and are told to go on unpaid leave until the shutdown is over. The following chart shows the furloughed rates at different departments (with scaling i’m assuming is according to the size of the department):</p>
 <div style="text-align: center;">
-<p><img src="hello_kitty.png" class="img-fluid" width="300"></p>
+<p><img src="chart.png" class="img-fluid"></p>
 </div>
-<div style="font-size: 82px; text-align: center; font-weight: bold;">
-<p>Hi, I’m <span style="color: rgb(245,0,38);">Hiba</span>!</p>
+<p>There are a number of issues with the following visualization:</p>
+<ul>
+<li><p>A lack of rhyme or reason with the random placement of the departments throughout the visualization; doesn’t seem to be an alphabetical, categorical, or value-based reasoning for the placement of the boxes.</p></li>
+<li><p>It isn’t clearly indicated whether the boxes are scaled by the population or size of the department (I could only assume based on an earlier visualization containing the departments).</p></li>
+<li><p>The color contrast between the two groups is too subtle.</p></li>
+<li><p>The grid pattern within the boxes doesn’t add anything meaningful and distracts from the percentages.</p></li>
+<li><p>Each department’s different layout and area makes it difficult to compare them.</p></li>
+</ul>
+<p>Overall, this visualization is an overly complex design for a simple message.</p>
+<p>&nbsp; &nbsp;</p>
+</section>
+<section id="redesign-1-bar-chart-of-furlough-percentage-rates-among-federal-departments" class="level2">
+<h2 class="anchored" data-anchor-id="redesign-1-bar-chart-of-furlough-percentage-rates-among-federal-departments">Redesign 1: Bar Chart of Furlough Percentage Rates among Federal Departments</h2>
+<p>When previously mention the message was over-complexly represented by the original design, I was referring to the furlough rates. And for this reason, my first redesign of the visualization was a straightforward bar chart which depicts the furlough rates of each federal department:</p>
+<p>&nbsp; &nbsp;</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-57d41f79dbd1d53559c0" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-57d41f79dbd1d53559c0">{"x":{"visdat":{"147ad4104bfdc":["function () ","plotlyVisDat"]},"cur_data":"147ad4104bfdc","attrs":{"147ad4104bfdc":{"y":{},"x":{},"orientation":"h","marker":{"color":"#0072B2"},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":200,"t":25,"r":10},"title":"Furlough Rates by Federal Department","xaxis":{"domain":[0,1],"automargin":true,"title":"Percentage of Employees Furloughed"},"yaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Federal Departments","standoff":20},"type":"category","categoryorder":"array","categoryarray":["OPM","Homeland Security","Justice","Transportation","GSA","USAID","NARA","Peace Corps","EOP","SBA","Agriculture","Interior","FTC","Treasury","EEOC","Commerce","SEC","Housing & Urban Development","NASA","EPA","NSF"]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"y":["OPM","Homeland Security","Justice","Transportation","GSA","USAID","NARA","Peace Corps","EOP","SBA","Agriculture","Interior","FTC","Treasury","EEOC","Commerce","SEC","Housing & Urban Development","NASA","EPA","NSF"],"x":[9.8000000000000007,14.699999999999999,16,37.200000000000003,50,51.399999999999999,61.299999999999997,61.899999999999999,61.899999999999999,64.900000000000006,66.5,76,76.700000000000003,83.299999999999997,84.5,86,93.5,95,95,95,97],"orientation":"h","marker":{"color":"#0072B2","line":{"color":"rgba(31,119,180,1)"}},"type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
-<div style="font-size: 82px; text-align: center; font-weight: bold;">
-<p>Welcome to my portfolio</p>
 </div>
+<p>This chart shows that furloughs aren’t uniformly distributed across federal departments. The departments which were civil-service heavy or generally had non-essential functions, like the National Science foundation, environmental protection agency, and NASA, had the highest furlough rates (well above 70%). On the other hand, departments considered essential, like homeland security, department of justice, and the department of transportation, were least effected with the lowest furlough rates. This difference in priority shown within the visualization challenges the idea of almost all government jobs having high security.</p>
+<p>&nbsp; &nbsp;</p>
+</section>
+<section id="redesign-2-grouped-bar-chart-of-the-furloughed-and-still-working-employees-by-federal-department" class="level2">
+<h2 class="anchored" data-anchor-id="redesign-2-grouped-bar-chart-of-the-furloughed-and-still-working-employees-by-federal-department">Redesign 2: Grouped Bar Chart of the Furloughed and Still-Working Employees by Federal Department</h2>
+<p>For the second visualization, I tried to include all the data that was shown within the original chart by including the working employee percentages as well. The values weren’t explicitly displayed in the originals, so I derived them using the given furloughed percentages when extracting the data.</p>
+<p>&nbsp; &nbsp;</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-5126878616afc5a57a0e" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-5126878616afc5a57a0e">{"x":{"visdat":{"147ad25534df8":["function () ","plotlyVisDat"]},"cur_data":"147ad25534df8","attrs":{"147ad25534df8":{"y":{},"x":{},"orientation":"h","marker":{"color":"#0072B2"},"name":"Furloughed","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"147ad25534df8.1":{"y":{},"x":{},"orientation":"h","marker":{"color":"#D55E00"},"name":"Working with or without pay","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"barmode":"stack","xaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Percentage of Employees","standoff":10}},"yaxis":{"domain":[0,1],"automargin":true,"title":{"text":"Federal Departments","standoff":20},"categoryorder":"total ascending","type":"category","categoryarray":["Agriculture","Commerce","EEOC","EOP","EPA","FTC","GSA","Homeland Security","Housing & Urban Development","Interior","Justice","NARA","NASA","NSF","OPM","Peace Corps","SBA","SEC","Transportation","Treasury","USAID"]},"legend":{"title":{"text":"Employee Status"},"orientation":"h","x":0.29999999999999999,"y":-0.20000000000000001},"title":"Furloughed vs. Working Employees by Federal Department","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"y":["NSF","Housing & Urban Development","NASA","EPA","SEC","Commerce","EEOC","Treasury","FTC","Interior","Agriculture","SBA","Peace Corps","EOP","NARA","USAID","GSA","Transportation","Justice","Homeland Security","OPM"],"x":[97,95,95,95,93.5,86,84.5,83.299999999999997,76.700000000000003,76,66.5,64.900000000000006,61.899999999999999,61.899999999999999,61.299999999999997,51.399999999999999,50,37.200000000000003,16,14.699999999999999,9.8000000000000007],"orientation":"h","marker":{"color":"#0072B2","line":{"color":"rgba(31,119,180,1)"}},"name":"Furloughed","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"y":["NSF","Housing & Urban Development","NASA","EPA","SEC","Commerce","EEOC","Treasury","FTC","Interior","Agriculture","SBA","Peace Corps","EOP","NARA","USAID","GSA","Transportation","Justice","Homeland Security","OPM"],"x":[3,5,5,5,6.5,14,15.5,16.699999999999999,23.300000000000001,24,33.5,35.100000000000001,38.100000000000001,38.100000000000001,38.700000000000003,48.600000000000001,50,62.799999999999997,84,85.299999999999997,90.200000000000003],"orientation":"h","marker":{"color":"#D55E00","line":{"color":"rgba(255,127,14,1)"}},"name":"Working with or without pay","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>Including the working employees percentage adds another scope of analysis for the furloughing situation. The perspective shifts from “how badly each department was effected” to a full department approach to the government shutdown. Though many employees from the non-essential departments were on furlough, they still maintained their status of hired until the shutdown ended and were not to work during this time. The prioritized departments like homeland security, justice, etc, were to continue their operations with or without pay until the shutdown ended. Seeing the high percentages of employees working through the shutdown offers a new perspective on the roles of certain government employees and their commitment during times of uncertainty.</p>
+<p>&nbsp; &nbsp;</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/cDEy_fk-_rc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<p>Zarracina, J., &amp; Zhou, L. (2019, January 12). The astonishing effects of the shutdown, in 8 charts. Vox. https://www.vox.com/policy-and-politics/2019/1/11/18177101/government-shutdown-longest-workers-agencies-charts</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
