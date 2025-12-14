@@ -1,0 +1,537 @@
+---
+title: "Final Project"
+format: html
+editor: visual
+---
+
+![](FC_StatData.png){fig-align="center" width="580"}
+
+## Group 1:
+
+-   Hiba Awan
+
+-   Nathania Stephens
+
+# [Abstract]{.underline}
+
+# [Introduction & Background]{.underline}
+
+## Motivation/ Purpose
+
+In 2023, there were over 30,000 arrests and close to 65,000 citations in Fairfax County. The Fairfax County boundaries, include areas such as Centreville, Chantilly, Herndon, Reston, Tysons Corner, McLean, Merrifield, George Mason, Annadale, Burke, Springfield, Alexandria, Lorton to name a few. If you live, work, or study in these areas then this project should be of interest to you. This project aims to inform Fairfax County patrons of crime information and hopefully provide some statistical insights that could be applicable.
+
+## Goals/ Objectives
+
+In order to provide relevant and insightful crime information, several different visualization methods were applied to help easily interpret and compare data. Statistical learning techniques were utilized to help understand statistic significantly factors and associations between variables. Since the data utilized for this project is largely categorical the project focuses on techniques such as Chi-Squared Test, *Logistic Regression, Decision Trees and Random Forest*.
+
+# [Data]{.underline}
+
+## Overview
+
+## About the Data
+
+Three datasets were pulled from the Fairfax County Police Department website. They covered arrest, citations, and warnings in the year 2023. For simplicity, general definitions are provided:
+
+-   **Arrest** - When a person is taken into custody to answer for an offense or when there is a deprivation or restraint of a person's liberty in any significant way.
+
+-   **Citation** - Formal notice issued by law enforcement officer for a violation of law, typically related to traffic laws or other minor offenses. Typically requiring a violator to appear in court or pay a fine.
+
+-   **Warning** - When a violation, typically minor, has been made but an officer issues a warning rather than a citation.
+
+The data sets included between 24 and 34 variables, but some of many of the variables were redundant or were not applicable to the research (e.g. web_address, phone_number, name). The following attributes were key to the research conducted:
+
+| Column Name | Data Type | Description                                        |
+|-------------------|-------------------|----------------------------------|
+| Date        | Date      | Date of Violation                                  |
+| Time        | Chr       | Time of Violation                                  |
+| Offense     | Chr       | Description of Violation                           |
+| Gender      | Chr       | Gender of Violator                                 |
+| Ethnicity   | Chr       | Hispanic or Non-Hispanic                           |
+| District    | Chr       | Administrative area                                |
+| Latitude    | Dbl       | Coordinates measuring north/ south of equator      |
+| Longitude   | Dbl       | Coordinates measuring east/ west of prime meridian |
+| Outcome     | Chr       | Result of violation, arrest, citation, or warning  |
+
+## Limitations and Assumptions
+
+Due to the nature of the data available on the Fairfax County Police Department website, analysis was limited to qualitative techniques. The approach taken for the project focused on predicting through qualitative responses or classification. This means that each record pulled from the Fairfax County Police Department (FCPD) would be assigned to a category or class.
+
+While understanding local crime is the goal of this project, the data acquired only accounts for crime that was recorded by FCPD. It does not take into account crimes that were not report or any other crime that was not reported through FCPD channels.
+
+## Cleaning and Transformation
+
+To address questions related to gender, the data needed to be standardized and correctly categorized. Column names needed to be consistent across the three datasets to merge. Gender was used over Sex. Next the column data would be transformed to consistent labels, e.g. Male, Female, and Other/Unknown. Total proportion for Gender was examined, to verify that other/ unknown class could be removed without...
+
+# [Research Questions]{.underline}
+
+1)  Is there an association between gender and warnings?
+
+2)  Are there other factors that determine if someone gets out of a "ticket"? OR Are you more likely to get a ticket at the end of the month (some believe that police officers have a monthly quota)
+
+3)  How do enforcement outcomes vary across districts and demographic groups?
+
+## Research & Analysis
+
+#### **Question 1: Is there an association between gender and warnings?**
+
+To address this question the null and alternative hypothesis are established.
+
+*Null Hypothesis:* There is no association between gender and violation outcome, warning or citation. This would mean that the likelihood of a violator getting a warning is independent of gender.
+
+*Alternative Hypothesis:* There is an association between gender and violation outcome. This implies that gender affects the outcome of whether a violator is given a citation or warning.
+
+According to the cleaned and combined dataset for warnings and citation, there was a total of 88,320 records. By looking at the counts for each outcome (citation or warning), there are a lot more citations than there are warnings given out by FCPD. This stacked bar chart also shows that males have a higher count for both categories.
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(leaflet)
+library(usmap)
+library(sf)
+library(readr)
+library(scales)
+library(tidyr)
+library(lubridate)
+
+# Read in the raw data for Warnings and Citations
+warnings = read_csv("2023_warning_data.csv", 
+                         col_types = cols(Warnings_Date = col_date(format = "%m/%d/%Y"), 
+                                          WEB_ADDRESS = col_skip(), PHONE_NUMBER = col_skip(), 
+                                          NAME = col_skip()))
+
+citations = read_csv("2023_citation_data.csv", 
+                                col_types = cols(Date = col_date(format = "%m/%d/%Y"), 
+                                                 WEB_ADDRESS = col_skip(), PHONE_NUMBER = col_skip(), 
+                                                 NAME = col_skip()))
+
+# Rename some columns
+citations = citations %>%
+  rename(ViolationDate = Date)
+
+# change Gender to sex in warnings and change date column name
+warnings = warnings %>%
+  rename(Sex = Gender)
+
+warnings = warnings %>%
+  rename(ViolationDate = Warnings_Date)
+
+# Adjust Citations and prepare for Merge
+# Assumption that ID is the officer's ID
+citations_processed = citations %>%
+  mutate(
+    outcome = "Citation",
+    Gender = case_when(
+      Sex == "M" ~ "Male",
+      Sex == "F" ~ "Female",
+      TRUE ~ "Other/Unknown"
+    ),
+    Year = year(ViolationDate),
+    Month = month(ViolationDate),
+    DayOfMonth = day(ViolationDate),
+    Time = parse_date_time(Time, "HM"),
+    data_type = "Citation"
+  ) %>%
+  select(
+    outcome, Gender, Year, Month, DayOfMonth, Time, Offense_Description = Charge,
+    District = DISTRICT, Race, Ethnicity, Latitude, Longitude, OfficerID = ID, data_type
+  )
+
+# Adjust Warnings and prepare for Merge
+warnings_processed = warnings %>%
+  mutate(
+    outcome = "Warning",
+    Gender = case_when(
+      Sex == "M" ~ "Male",
+      Sex == "F" ~ "Female",
+      TRUE ~ "Other/Unknown"
+    ),
+    Year = year(ViolationDate),
+    Month = month(ViolationDate),
+    DayOfMonth = day(ViolationDate),
+    Time = parse_date_time(Time, "HM"),
+    data_type = "Warning"
+  ) %>%
+  select(
+    outcome, Gender, Year, Month, DayOfMonth, Time, Offense_Description, District = DISTRICT, Race, 
+    Ethnicity, Latitude = Lat, Longitude = Long, OfficerID = Officer_ID, data_type
+  )
+
+# Combined for ultimate Data coordination!
+combined_wc = bind_rows(citations_processed, warnings_processed)
+
+# Add ultimate binary outcome! 0 = Citation, 1 = Warning/ Got out of ticket
+combined_wc = combined_wc %>%
+  mutate(
+    BinaryOutcome = ifelse(outcome == "Warning", 1,0)
+  )
+
+## Change to Title Case for District Names
+combined_wc$District = tools::toTitleCase(tolower(combined_wc$District))
+
+## Examining Unverified data
+## After examination, unverified only makes up 0.0143 or 1.43% of the data set, so we will remove
+## because it is a very small portion of the total proportion. 
+# combined_wc %>%
+#  count(District) %>%
+#  mutate(Proportion = n / sum(n)) %>%
+#  arrange(desc(n))
+
+## Filter out Unverified and NA
+combined_wc = combined_wc %>%
+  filter(District != "Unverified")
+
+combined_wc = combined_wc %>%
+  filter(!is.na(District))
+
+## Filter out Other/Unknown Gender
+combined_wc_mf = combined_wc %>%
+  filter(Gender != "Other/Unknown")
+
+
+## Stacked Bar chart for Outcome and Gender
+ggplot(combined_wc_mf, aes(x = outcome, fill = Gender)) +
+  geom_bar() +
+  labs(
+    title = "Count of Outcomes by Gender",
+    x = "Outcome Type",
+    y = "# of Incident",
+    fill = "Gender"
+  ) + theme_gray() + theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_manual(values = c("Female" = "lightpink2", "Male" = "lightsteelblue"))
+```
+
+Next, the warning rate for gender is calculated. This looks at the probability of a male or female violator receiving a Warning instead of a citation e.g. getting out of a ticket. To calculate warning rate, the number of warnings are divided by the total number of incidents. $$
+\frac{\text{Number of Warnings}}{\text{Total Incidents (Warnings + Citations)}}
+$$
+
+This shows a slight difference in proportion between the two genders, with females having a higher warning rate than males. In other words, females received more warnings than males. Is this difference significant or is it a result of chance or other factors? To help understand these results, the Chi-Square Test of Independence is used. The Chi-Square Test of Independence will help determine whether the variables, gender and outcome, are independent or if there is a relationship between them.
+
+```{r}
+#| echo: false
+#| warning: false
+## Now for some visuals: Gender Chart
+## Examining the proportion of stops resulting in a Warning Vs Citation
+## the Warning rate is the proportion of incidents that are warnings.
+gender_warning_rate = combined_wc_mf %>%
+  group_by(Gender) %>%
+  summarise(
+    Total_Incidents = n(),
+    Warning_Rate = mean(BinaryOutcome)
+  ) %>%
+  ungroup()
+
+gender_chart = ggplot(gender_warning_rate,
+                      aes(x = Gender, y = Warning_Rate, fill = Gender)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = scales::percent(Warning_Rate, accuracy = 0.1)),
+            vjust = -0.5, size = 5) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, max(gender_warning_rate$Warning_Rate) * 1.1)) +
+  labs(
+    title = "Warning Rate by Gender",
+    subtitle = "Proportion of stops resulting in a Warning (vs Citation)",
+    x = "Gender",
+    y = "Warning Rate"
+  ) + theme_gray() + theme(plot.title = element_text(hjust = 0.5)) + theme(plot.subtitle = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c("Female" = "lightpink2", "Male" = "lightsteelblue"))
+
+gender_chart
+```
+
+$$
+\chi^2 = \sum \frac{(O-E)^2}{E}
+$$ To implement the Chi-Square Test, a contingency table is generated, which shows the distribution for gender and outcome.
+
+| Gender | Citations | Warnings |
+|--------|-----------|----------|
+| Female | 20,478    | 8,777    |
+| Male   | 43,657    | 15,408   |
+
+```{r}
+#| warning: false
+#| include: false
+## Now the Chi-Squared Test starting with the Contingency Table
+contingency_tbl = combined_wc_mf %>%
+  filter(Gender %in% c("Male", "Female")) %>%
+  select(Gender, BinaryOutcome) %>%
+  table()
+
+chi_sq_results = chisq.test(contingency_tbl)
+
+expected_counts = chi_sq_results$expected
+
+```
+
+The results of the Chi-Square test shows:
+
+-   **Chi-Square Statistic (x-squared)**: The chi-square test statistic is 150.62. This is the discrepancy between the observed frequencies, citations and warnings, and the expected frequencies if there were no association between the gender and outcome. This is demonstrated in the below tables.
+
+| Gender | Expected Citations | Observed Citations | Expected Warnings | Observed Warnings |
+|---------------|---------------|---------------|---------------|---------------|
+| Female | 21,243 | 20,478 | 8,011 | 8,777 |
+| Male | 42,891 | 43,657 | 16,173 | 15,408 |
+
+-   **Degrees of Freedom (df)**: The degree of freedom for this test is 1, which is the number of rows minus 1 multiplied by number of columns minus 1.
+
+-   **p-value**: The p-value is 2.2e-16 which is much smaller than 0.05. This represents the probability of observing the chi-square statistic, 150.62, or more if the null hypothesis were true.
+
+To visualize each value in the above table by its contribution to the chi-square test a heatmap is generated. This quickly shows which values have the highest contribution percentage.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Heatmap
+library(pheatmap)
+# observed count
+observed_counts = chi_sq_results$observed
+# Calculated expected above.
+# Calculate residuals
+pearson_residuals = chi_sq_results$residuals
+
+# Calculate contributions to chi-square statistic
+contributions = (observed_counts - expected_counts)^2 / expected_counts
+
+total_chi_square = chi_sq_results$statistic
+
+percentage_contributions = 100 * contributions / total_chi_square
+colnames(percentage_contributions) = c("Citation", "Warning")
+pheatmap(percentage_contributions,
+         display_numbers = TRUE,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         main = "Percentage Contribution to Chi-Square Statistic",
+         fontsize = 11,
+         fontsize_row = 11,
+         fontsize_col = 11,
+         fontsize_number = 15
+         )
+
+```
+
+Thus the null hypothesis is rejected. The results show that there is a statistically significant association between gender and violation outcome in Fairfax County. In other words, the Chi-square test indicates that the likelihood of a violation outcome is significantly associated with gender.
+
+#### Another Questions....
+
+To address each of these question, first exploratory analysis should be done to gain an understanding and summary of the crime metrics for Fairfax County. This includes understanding what type of crimes occurred the most and where.
+
+General crime Mapping the arrest data for a geospatial visual of where arrest occur.
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+
+
+Arrest2023 <- read_csv("2023_arrest_data.csv", 
+                       col_types = cols(ArresteeNumber = col_skip(), 
+                                        ArrestDate = col_date(format = "%m/%d/%Y"), 
+                                        ArrestTime = col_character(), WEB_ADDRESS = col_skip(), 
+                                        PHONE_NUMBER = col_skip(), NAME = col_skip()))
+
+## Remove any outliers by setting min/max lat and long.
+min_lat = 38.6
+max_lat = 39.0
+min_lon = -77.6
+max_lon = -77.0
+
+## Using all data but excluding any coordinates that are not within coordinates
+arrest_data_clean = Arrest2023 %>%
+  filter(
+    Latitude >= min_lat,
+    Latitude <= max_lat,
+    Longitude >= min_lon,
+    Longitude <= max_lon
+  )
+
+## Include district boundaries by reading in shape file downloaded from Fairfax County site
+district_boundaries = st_read("Supervisor_Districts/Supervisor_Districts.shp")
+
+## Transform to WGS84 projection to match basemap within leaflet
+if (st_crs(district_boundaries)$epsg != 4326) {
+  district_boundaries = st_transform(district_boundaries, 4326)
+}
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+## Using leaflet to map the Arrest data and include district layers
+leaflet() %>%
+  addProviderTiles(providers$OpenStreetMap) %>%
+  addPolygons(
+    data = district_boundaries,
+    fillOpacity = 0.5,
+    color = "black",
+    weight = 1,
+    popup = ~paste("District:", DISTRICT)
+  ) %>%
+  addCircleMarkers(
+    data = arrest_data_clean,
+    lng = ~Longitude,
+    lat = ~Latitude,
+    radius = 2.5,
+    color = "darkred",
+    stroke = FALSE,
+    fillOpacity = 0.3,
+    popup = ~paste(
+      "Case Number: ", CaseNumber, "<br>",
+      "Arrest Type: ", IBRDescription)
+  )
+```
+
+Next we look at the **Top 10 Arrest Type** by Incident Based Reporting (IBR) codes.
+
+```{r}
+#| echo: false
+#| warning: false
+# By IBRCode
+arrest_count = Arrest2023 %>%
+  group_by(IBRCode) %>%
+  summarise(Count = n()) %>%
+  ungroup() %>%
+  arrange(desc(Count))
+
+# Get top 10
+top_10_arrest_IBR = head(arrest_count, 10)
+
+# Add codes - General Description
+IBRCodeDetails = read.csv("IBRcodes.csv")
+
+# Reassign the codes
+top_10_arrest_decoded = top_10_arrest_IBR %>%
+  left_join(IBRCodeDetails, by = c("IBRCode" = "CODE")) %>%
+  select(IBRCode, OFFENSE, everything())
+
+top_10_arrest_cleaned = top_10_arrest_decoded %>%
+  distinct(IBRCode, OFFENSE, .keep_all = TRUE)
+
+# Decode for cleaner results
+arrest_chart = ggplot(top_10_arrest_cleaned, aes(x = reorder(OFFENSE, Count),
+                                              y = Count)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  coord_flip() +
+  labs(title = "Top 10 Arrest Type by IBR decoded",
+       x = "Offense by IBR Code",
+       y = "Number of Arrests") +
+  theme_grey() +
+  geom_text(aes(label = Count), hjust = -0.1, size = 3.5) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15)))
+
+arrest_chart
+
+```
+
+Next examining the **Top 10 Citations**
+
+**Warning Versus Citation** Next an examination of warning versus citation will be observed... This will help understand what different factors could play into getting a warning or a citation.
+
+#### **Question 2: ...**
+
+...
+
+#### **Question 3: How do enforcement outcomes vary across districts and demographic groups?**
+
+Finally, we'll be exploring the relationships between the outcomes of crime incidents and their district and demographic (gender, race, ethnicity) variables. Addressing this final question involved combining the three data sets of different crime outcomes: arrest data, citation data, and warning data.
+
+```{r}
+#| echo: false
+combined_data <- read.csv("combined_crime_data.csv")
+
+library(ggplot2)
+
+ggplot(combined_data, aes(x = Outcome, fill = District)) +
+  geom_bar(position = "stack") + # change to "fill" for proportions
+  coord_flip() +
+  labs(
+    title = "Enforcement Outcomes by District",
+    x = "Outcome",
+    y = "Count",
+    fill = "District"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+Starting with the outcomes across different districts, we start off by performing a chi-square test to establish whether there's a relationship between the crime outcomes and the districts they took place in.
+
+*Null Hypothesis:* Enforcement outcome is independent of police district.
+
+*Alternative hypothesis:* Enforcement outcome and police district are associated.
+
+For the chi-square implementation, a contingency table for the district and outcome counts is generated:
+
+```{r}
+#| echo: false
+table(combined_data$District, combined_data$Outcome)
+```
+
+From both the visualization above and the table output, we can see that citations are the most common outcome among the districts. However, this won't affect the test as chi-square allows unequal margin totals. The other outcomes, arrests and warnings, vary substantially in volume across districts. Some districts (like Sully, Springfield, Providence) show particularly high citation counts, while others (Braddock, Dranesville) show lower overall enforcement volumes.
+
+Then the test is performed:
+
+```{r}
+#| echo: false
+chisq.test(table(combined_data$District, combined_data$Outcome))
+```
+
+The chi-square statistic is extremely large, which indicates a substantial deviation between observed and expected counts. The p-value is also low enough that we reject the null hypothesis. Therefore, there is a statistically significant association between district and enforcement outcome.
+
+From this, we can see that enforcement severity varies by district and district-level patterns justify further modeling.
+
+```{r}
+#| echo: false
+library(dplyr)
+library(tidyr)
+
+demo_long <- combined_data %>%
+  pivot_longer(
+    cols = c(Gender, Race, Ethnicity),
+    names_to = "variable",
+    values_to = "group"
+  )
+
+ggplot(demo_long, aes(x = Outcome, fill = group)) +
+  geom_bar(position = "stack") +
+  facet_wrap(~ variable, scales = "free_x") +
+  coord_flip() +
+  labs(
+    title = "Enforcement Outcomes by Demographics",
+    x = "Outcome",
+    y = "Count",
+    fill = "Demographic Group"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
+
+
+
+```{r}
+#| echo: false
+library(nnet)
+
+combined_data$Outcome  <- factor(combined_data$Outcome)
+combined_data$Race     <- factor(combined_data$Race)
+combined_data$Gender   <- factor(combined_data$Gender)
+combined_data$District <- factor(combined_data$District)
+combined_data$Ethnicity <- factor(combined_data$Ethnicity)
+
+model <- multinom(Outcome ~ Race + Gender + District + Ethnicity, data = combined_data)
+summary(model)
+
+```
+
+Performing multinomial logistic regression shows that enforcement outcomes vary systematically across both police districts and demographic groups. Certain districts, such as Providence and Sully, have higher relative odds of arrest compared to citations or warnings. Race and ethnicity are also significant predictors: Black and Hispanic individuals are more likely to be arrested rather than receive less severe enforcement actions. Gender has smaller but detectable effects. These results indicate that enforcement outcomes are influenced by both location and demographic characteristics.
+
+
+# [Conclusion]{.underline}
+
+# [References]{.underline}
