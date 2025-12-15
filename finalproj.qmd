@@ -568,9 +568,9 @@ The higher intensity or darker color areas represent a higher citation rate. Dur
 To visualize citation and warnings geospatially, a map is generated using the latitude and longitude associated to each record. While this map is helpful for understanding concentrations of citations and warning. It is misleading in show the most dominate outcomes. This is likely due to the quantity of data points overlaid on one another; however, since it is interactive areas can be zoomed in on for further insight.
 
 ```{r}
+#| echo: false
 #| message: false
 #| warning: false
-#| include: false
 
 
 Arrest2023 <- read_csv("2023_arrest_data.csv", 
