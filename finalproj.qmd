@@ -37,9 +37,7 @@ Provide relevant, understandable, and insightful crime patterns using several di
 
 ## Overview
 
-## About the Data
-
-Three datasets were pulled from the Fairfax County Police Department website. They covered arrest, citations, and warnings in the year 2023. For simplicity, general definitions are provided:
+The Fairfax County Police Department (FCPD) operate in eight police districts and within those districts they are broken out into smaller Police Service Areas (PSAs). In 2023, the Fairfax County Police Department had more arrest and citation than the year prior. There were more assault offenses, theft and larceny. However, there were less homicide offenses, sex offenses, robbery, and fatal crashes. FCPD makes this information and its corresponding data available on their website (FCDP Open Data Portal, n.d). Three datasets were pulled from the Fairfax County Police Department website. They covered arrest, citations, and warnings in the year 2023. For simplicity, general definitions are provided:
 
 -   **Arrest** - When a person is taken into custody to answer for an offense or when there is a deprivation or restraint of a person's liberty in any significant way.
 
@@ -47,7 +45,7 @@ Three datasets were pulled from the Fairfax County Police Department website. Th
 
 -   **Warning** - When a violation, typically minor, has been made but an officer issues a warning rather than a citation.
 
-The data sets included between 24 and 34 variables, but some of many of the variables were redundant or were not applicable to the research (e.g. web_address, phone_number, name). The following attributes were key to the research conducted:
+The data sets included between 24 and 34 variables, but many of the variables were redundant or were not applicable to the research (e.g. web_address, phone_number, name).(FCDP Open Data Portal, n.d) Redundant columns and non-applicable columns were removed (Table 1). Additional columns were created from parsed information derived from original attributes, e.g. Hour of Day and Day of Month.
 
 | Column Name | Data Type | Description                                        |
 |-------------------|-------------------|----------------------------------|
@@ -60,6 +58,7 @@ The data sets included between 24 and 34 variables, but some of many of the vari
 | Latitude    | Dbl       | Coordinates measuring north/ south of equator      |
 | Longitude   | Dbl       | Coordinates measuring east/ west of prime meridian |
 | Outcome     | Chr       | Result of violation, arrest, citation, or warning  |
+: Table 1: Attribute table
 
 ## Limitations and Assumptions
 
