@@ -640,6 +640,7 @@ leaflet() %>%
 Next, through the use of Logistic Regression, the odds ratios is examined between citations and warnings for Fairfax county. Predictor variables, time of day, week progression, day of month, district are used to predict the probability that a warning or citation will occur. The results provide an odd ratios at the intercept of 0.532 which would indicate that the odds of getting a warning are less than 50/50. In other words, if pulled over for a traffic violation, it is not a flip of a coin whether you get a ticket or not. Your chance of getting a citation is higher according to the intercept generated through this logistic regression model. Additionally, the model showed factors that did increased the likelihood of getting a warning occurred in certain districts (Mount Vernon, Mason, and Franconia) and progression of the week influences leniency. In weekly progression, an odds ratio of 1.595 shows that as the week progresses from Monday to Sunday, the odds of recieving a warning increase by 59.5 %. Alternatively, factors such as time of day and day of the month showed an increased likelihood of a citation. Using the below graph, the top five odds ratio for citation and bottom five odds ratio for warnings are depicted.
 
 ```{r}
+#| eval: false
 #| message: false
 #| warning: false
 #| include: false
@@ -705,9 +706,10 @@ print(odds_ratio_df_chrono %>%
 ```
 
 ```{r}
-#| echo: false
+#| eval: false
 #| message: false
 #| warning: false
+#| include: false
 ## new visual
 top_citation_chrono = odds_ratio_df_chrono %>%
   filter(Variable != "(Intercept)") %>%
@@ -759,9 +761,10 @@ odds_ratio_plot_chrono
 Gender and race were originally included but removed to isolate only time and space variables. Additionally, after running both models, the Area Under the Curve (AUC) increased only slightly (+ 0.0004) after removal of race and gender. This would mean that while gender and race were statistically significant, they were not as strong of predictors as date/time and district when classifying an outcome of either citation or warning. The AUC for the model that focused date/time and district was 0.6289. Which means that 63% of the citation/warning outcome is predictable using day of the month, time of day, progression of week, and district. The other 37% of the outcome is due to other factors not captured in this model. These factors could include offense type, violator's behavior, and officer variables. While not a particularly strong predictive model, the model helps understand the effects of time and location.
 
 ```{r}
-#| echo: false
+#| eval: false
 #| message: false
 #| warning: false
+#| include: false
 ## Calculate AUC
 library(pROC)
 
@@ -884,7 +887,7 @@ The results below are done with arrest as the reference outcome, so the coeffici
 
 *Gender:* In terms of reference F (female), males have lower odds of receiving a citations or warning vs arrest.
 
-*Ethnicity:* Variable only really indicates hispanic or non-hispanic, so in terms of this, hispanic individuals have lower odds of receiving a citation or ticket vs arrest.
+*Ethnicity:* Variable only really indicates hispanic or non-hispanic, so in terms of this, hispanic individuals have lower odds of receiving a citation or warning vs arrest.
 
 *District:* Mason, Providence, Franconia, Hunter Mill, and Sully individuals have a lower odds of receiving citations/warnings than arrests. 
 
@@ -899,4 +902,17 @@ Performing multinomial logistic regression shows that enforcement outcomes vary 
 
 # [Conclusion]{.underline}
 
+Through the research conducted in this project we were able to examine the law enforcement outcomes in Fairfax County using data from 2023. We were able to reject our null hypothesis which stated that there was no association between gender and violation outcome. Results from the Chi-Square test showed that there was a statistically significant association between gender and outcome. However, while gender was statistically significant, gender was found to be a weak predictor after running logistic regression models. Factors such as time and location had more of an influence when predicting the odds ratio of a warning versus citation. The Area Under of the Curve (AUC) for the logistic regression model was about 63% which considering the limitations of the dataset focusing specifically on time and space emphasizes the importance of time and location patterns for crime prediction. If factors such as offense type and description where used this would have very likely resulted in a stronger predictive model. While prediction was limited, this project highlights time and space trends showing odds ratio for citations between 5am and 6am were higher for receiving a citation while odds for receiving a warning increased as the week progressed. As noted, was the higher likelihood of a warning in the Mount Vernon, Mason, and Franconia districts.
+
+
 # [References]{.underline}
+
+1.  Fairfax County Police Department (FCPD) Open Data Portal. (n.d.). FCPD Annual Reports. https://www.fcpod.org/pages/annual-reports
+
+2.  Google. (2025). Gemini (Flash 2.5) \[Large language model\]. Retrieved from https://gemini.google.com/
+
+3.  Thevapalan, A. (2024, August 29). Chi-Square Test in R: A Complete Guide. DataCamp. https://www.datacamp.com/tutorial/chi-square-test-r
+
+4.  Chugh, V. (2023, March 17). Logistic Regression in R Tutorial. DataCamp. https://www.datacamp.com/tutorial/logistic-regression-R
+
+5.  James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). An Introduction to Statistical Learning: with Applications in R (1st ed. 2013.). Springer New York. https://doi.org/10.1007/978-1-4614-7138-7
