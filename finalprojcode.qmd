@@ -207,7 +207,253 @@ pheatmap(percentage_contributions,
 
 ## Question 2:
 
-...
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+plot_heatmap_discrete_axes = ggplot(
+  heatmap_days, 
+  aes(x = Hour, y = DayOfMonth, fill = Citation_Rate, text = text)
+) +
+  geom_tile(aes(width = 1, height = 1), color = "white", linewidth = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    direction = -1,
+    name = "Citation Rate",
+    labels = scales::percent
+  ) +
+  scale_x_discrete(name = "Hour of Day (0 = Midnight, 12 = Noon)", drop = FALSE) + 
+  scale_y_discrete(drop = FALSE) + 
+  labs(
+    title = "Citation Rate by Day of Month and Hour of Day",
+    subtitle = "Higher intensity (darker color) indicates a higher proportion of Citations",
+    y = "Day of the Month"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(vjust = 0.1, hjust = 0.1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+plot_heatmap_discrete_axes
+```
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+
+
+Arrest2023 <- read_csv("2023_arrest_data.csv", 
+                       col_types = cols(ArresteeNumber = col_skip(), 
+                                        ArrestDate = col_date(format = "%m/%d/%Y"), 
+                                        ArrestTime = col_character(), WEB_ADDRESS = col_skip(), 
+                                        PHONE_NUMBER = col_skip(), NAME = col_skip()))
+
+## Remove any outliers by setting min/max lat and long.
+min_lat = 38.6
+max_lat = 39.0
+min_lon = -77.6
+max_lon = -77.0
+
+## Using all data but excluding any coordinates that are not within coordinates
+arrest_data_clean = Arrest2023 %>%
+  filter(
+    Latitude >= min_lat,
+    Latitude <= max_lat,
+    Longitude >= min_lon,
+    Longitude <= max_lon
+  )
+
+## Include district boundaries by reading in shape file downloaded from Fairfax County site
+district_boundaries = st_read("Supervisor_Districts/Supervisor_Districts.shp")
+
+## Transform to WGS84 projection to match basemap within leaflet
+if (st_crs(district_boundaries)$epsg != 4326) {
+  district_boundaries = st_transform(district_boundaries, 4326)
+}
+```
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+## Using leaflet to map the Outcomes across Fairfax County
+
+pal = colorFactor(
+  palette = c("red", "gold1"), 
+  domain = combined_wc_mf$outcome, 
+  levels = c("Citation", "Warning") 
+)
+
+leaflet() %>%
+  addProviderTiles(providers$OpenStreetMap) %>%
+  addPolygons(
+    data = district_boundaries,
+    fillOpacity = 0.5,
+    color = "black",
+    weight = 1,
+    popup = ~paste("District:", DISTRICT)
+  ) %>%
+  addCircleMarkers(
+    data = combined_wc_mf,
+    lng = ~Longitude,
+    lat = ~Latitude,
+    radius = 2.5,
+    color = ~pal(outcome),
+    stroke = FALSE,
+    fillOpacity = 0.4,
+    popup = ~paste(
+      "Outcome: ", outcome, "<br>")
+  )
+```
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(dplyr)
+library(lubridate)
+library(caTools)
+library(pROC) 
+
+#Add HourOfDay
+combined_wc_mf = combined_wc_mf %>%
+  mutate(
+    HourOfDay = hour(Time))
+
+combined_wc_mf <- combined_wc_mf %>%
+  mutate(
+    DayOfWeek = wday(
+      as.Date(paste(Year, Month, DayOfMonth, sep = "-")),
+      label = TRUE,
+      abbr = TRUE,
+      week_start = 1
+    )
+  )
+
+model_columns_chrono = c(
+  "BinaryOutcome",
+  "HourOfDay",
+  "DayOfMonth",
+  "DayOfWeek",
+  "District"
+)
+
+data_for_modeling = combined_wc_mf %>%
+  select(all_of(model_columns_chrono)) %>%
+  mutate(across(c(HourOfDay, DayOfMonth, DayOfWeek, District), as.factor)) %>%
+  mutate(BinaryOutcome = factor(BinaryOutcome, levels = c(0, 1))) %>%
+  na.omit()
+
+data_for_modeling
+
+set.seed(42)
+
+sample_split_chrono = sample.split(
+  Y = data_for_modeling$BinaryOutcome,
+  SplitRatio = 0.70
+)
+
+train_set_chrono = subset(data_for_modeling, sample_split_chrono == TRUE)
+test_set_chrono = subset(data_for_modeling, sample_split_chrono == FALSE)
+
+logistic_model_chrono = glm(
+  formula = BinaryOutcome ~ .,
+  data = train_set_chrono,
+  family = binomial(link = "logit")
+)
+
+odds_ratio_chrono = exp(coef(logistic_model_chrono))
+
+odds_ratio_df_chrono = data.frame(
+  Variable = names(odds_ratio_chrono),
+  OddsRatio = odds_ratio_chrono
+)
+
+print(odds_ratio_df_chrono %>%
+        filter(Variable != "(Intercept)") %>%
+        arrange(OddsRatio) %>%
+        head(30))
+```
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+## new visual
+top_citation_chrono = odds_ratio_df_chrono %>%
+  filter(Variable != "(Intercept)") %>%
+  arrange(OddsRatio) %>%
+  head(5) %>%
+  mutate(Effect = "Stronger Citation Likelihood")
+
+top_warning_chrono = odds_ratio_df_chrono %>%
+  filter(Variable != "(Intercept)") %>%
+  arrange(desc(OddsRatio)) %>%
+  head(5) %>%
+  mutate(Effect = "Stronger Warning Likelihood")
+
+plot_data_chrono = bind_rows(top_citation_chrono, top_warning_chrono)
+
+plot_data_chrono = plot_data_chrono %>%
+  mutate(
+    Variable = gsub("HourOfDay", "Hr:", Variable),
+    Variable = gsub("DayOfMonth", "Day:", Variable),
+    Variable = gsub("DayOfWeek", "Week:", Variable),
+    Variable = gsub("District", "Dist:", Variable)
+  )
+
+odds_ratio_plot_chrono = ggplot(plot_data_chrono, aes(x = Variable, y = OddsRatio, fill = Effect)) +
+  geom_bar(stat = "identity", position = "identity") +
+  geom_hline(yintercept = 1.0, linetype = "dashed", color = "black", linewidth = 1) +
+  scale_y_continuous(
+    trans = 'log2', 
+    breaks = c(0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 2.5),
+    labels = c("0.3", "0.5", "0.7", "1.0", "1.5", "2.0", "2.5")
+  ) +
+  labs(
+    title = "Odds Ratios of Date and Location Factors on Issuing a Warning",
+    subtitle = "Based on Hour, Day of Month, Day of Week, and District",
+    x = "Predictor Variable",
+    y = "Odds Ratio (Warning vs. Citation)",
+    fill = "Enforcement Discretion"
+  ) +
+  scale_fill_manual(values = c("Stronger Citation Likelihood" = "coral3", "Stronger Warning Likelihood" = "gold1")) +
+  
+  # Flip coordinates for a horizontal bar chart (easier to read labels)
+  coord_flip() +
+  theme_grey(base_size = 11)
+
+odds_ratio_plot_chrono
+```
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+## Calculate AUC
+library(pROC)
+
+probability_chrono = predict(
+  logistic_model_chrono,
+  newdata = test_set_chrono,
+  type = "response"
+)
+
+roc_obj_chrono = roc(
+  response = test_set_chrono$BinaryOutcome,
+  predictor = probability_chrono,
+  levels = c(0,1) 
+)
+auc_value_chrono = auc(roc_obj_chrono)
+
+round(auc_value_chrono, 4)
+
+```
 
 ## Question 3:
 

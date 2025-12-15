@@ -322,122 +322,6 @@ pheatmap(percentage_contributions,
 
 Thus the null hypothesis is rejected. The results show that there is a statistically significant association between gender and violation outcome in Fairfax County. In other words, the Chi-square test indicates that the likelihood of a violation outcome is significantly associated with gender.
 
-#### Another Questions....
-
-To address each of these question, first exploratory analysis should be done to gain an understanding and summary of the crime metrics for Fairfax County. This includes understanding what type of crimes occurred the most and where.
-
-General crime Mapping the arrest data for a geospatial visual of where arrest occur.
-
-```{r}
-#| message: false
-#| warning: false
-#| include: false
-
-
-Arrest2023 <- read_csv("2023_arrest_data.csv", 
-                       col_types = cols(ArresteeNumber = col_skip(), 
-                                        ArrestDate = col_date(format = "%m/%d/%Y"), 
-                                        ArrestTime = col_character(), WEB_ADDRESS = col_skip(), 
-                                        PHONE_NUMBER = col_skip(), NAME = col_skip()))
-
-## Remove any outliers by setting min/max lat and long.
-min_lat = 38.6
-max_lat = 39.0
-min_lon = -77.6
-max_lon = -77.0
-
-## Using all data but excluding any coordinates that are not within coordinates
-arrest_data_clean = Arrest2023 %>%
-  filter(
-    Latitude >= min_lat,
-    Latitude <= max_lat,
-    Longitude >= min_lon,
-    Longitude <= max_lon
-  )
-
-## Include district boundaries by reading in shape file downloaded from Fairfax County site
-district_boundaries = st_read("Supervisor_Districts/Supervisor_Districts.shp")
-
-## Transform to WGS84 projection to match basemap within leaflet
-if (st_crs(district_boundaries)$epsg != 4326) {
-  district_boundaries = st_transform(district_boundaries, 4326)
-}
-```
-
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
-## Using leaflet to map the Arrest data and include district layers
-leaflet() %>%
-  addProviderTiles(providers$OpenStreetMap) %>%
-  addPolygons(
-    data = district_boundaries,
-    fillOpacity = 0.5,
-    color = "black",
-    weight = 1,
-    popup = ~paste("District:", DISTRICT)
-  ) %>%
-  addCircleMarkers(
-    data = arrest_data_clean,
-    lng = ~Longitude,
-    lat = ~Latitude,
-    radius = 2.5,
-    color = "darkred",
-    stroke = FALSE,
-    fillOpacity = 0.3,
-    popup = ~paste(
-      "Case Number: ", CaseNumber, "<br>",
-      "Arrest Type: ", IBRDescription)
-  )
-```
-
-Next we look at the **Top 10 Arrest Type** by Incident Based Reporting (IBR) codes.
-
-```{r}
-#| echo: false
-#| warning: false
-# By IBRCode
-arrest_count = Arrest2023 %>%
-  group_by(IBRCode) %>%
-  summarise(Count = n()) %>%
-  ungroup() %>%
-  arrange(desc(Count))
-
-# Get top 10
-top_10_arrest_IBR = head(arrest_count, 10)
-
-# Add codes - General Description
-IBRCodeDetails = read.csv("IBRcodes.csv")
-
-# Reassign the codes
-top_10_arrest_decoded = top_10_arrest_IBR %>%
-  left_join(IBRCodeDetails, by = c("IBRCode" = "CODE")) %>%
-  select(IBRCode, OFFENSE, everything())
-
-top_10_arrest_cleaned = top_10_arrest_decoded %>%
-  distinct(IBRCode, OFFENSE, .keep_all = TRUE)
-
-# Decode for cleaner results
-arrest_chart = ggplot(top_10_arrest_cleaned, aes(x = reorder(OFFENSE, Count),
-                                              y = Count)) +
-  geom_bar(stat = "identity", fill = "darkred") +
-  coord_flip() +
-  labs(title = "Top 10 Arrest Type by IBR decoded",
-       x = "Offense by IBR Code",
-       y = "Number of Arrests") +
-  theme_grey() +
-  geom_text(aes(label = Count), hjust = -0.1, size = 3.5) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.15)))
-
-arrest_chart
-
-```
-
-Next examining the **Top 10 Citations**
-
-**Warning Versus Citation** Next an examination of warning versus citation will be observed... This will help understand what different factors could play into getting a warning or a citation.
-
 #### **Question 2: How Does Time and Location Factor into the Odds of a Citations?**
 
 For this research question, variables such as time of day, progression of week, day of month, and district are examined to determine if those variable influence an officer's decision to issue a warning or citation. For this question, arrests are excluded since it is assumed a higher threshold of danger is imminent and would allow for less use of officers' discretion.
@@ -649,7 +533,6 @@ leaflet() %>%
 Next, through the use of Logistic Regression, the odds ratios is examined between citations and warnings for Fairfax county. Predictor variables, time of day, week progression, day of month, district are used to predict the probability that a warning or citation will occur. The results provide an odd ratios at the intercept of 0.532 which would indicate that the odds of getting a warning are less than 50/50. In other words, if pulled over for a traffic violation, it is not a flip of a coin whether you get a ticket or not. Your chance of getting a citation is higher according to the intercept generated through this logistic regression model. Additionally, the model showed factors that did increased the likelihood of getting a warning occurred in certain districts (Mount Vernon, Mason, and Franconia) and progression of the week influences leniency. In weekly progression, an odds ratio of 1.595 shows that as the week progresses from Monday to Sunday, the odds of recieving a warning increase by 59.5 %. Alternatively, factors such as time of day and day of the month showed an increased likelihood of a citation. Using the below graph, the top five odds ratio for citation and bottom five odds ratio for warnings are depicted.
 
 ```{r}
-#| eval: false
 #| message: false
 #| warning: false
 #| include: false
@@ -663,11 +546,15 @@ combined_wc_mf = combined_wc_mf %>%
   mutate(
     HourOfDay = hour(Time))
 
-combined_wc_mf = combined_wc_mf %>%
+combined_wc_mf <- combined_wc_mf %>%
   mutate(
-    DayOfWeek = factor(
-      wday(ViolationDate, label = TRUE, week_start = 1),
-      levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")))
+    DayOfWeek = wday(
+      as.Date(paste(Year, Month, DayOfMonth, sep = "-")),
+      label = TRUE,
+      abbr = TRUE,
+      week_start = 1
+    )
+  )
 
 model_columns_chrono = c(
   "BinaryOutcome",
@@ -715,10 +602,9 @@ print(odds_ratio_df_chrono %>%
 ```
 
 ```{r}
-#| eval: false
+#| echo: false
 #| message: false
 #| warning: false
-#| include: false
 ## new visual
 top_citation_chrono = odds_ratio_df_chrono %>%
   filter(Variable != "(Intercept)") %>%
@@ -770,7 +656,6 @@ odds_ratio_plot_chrono
 Gender and race were originally included but removed to isolate only time and space variables. Additionally, after running both models, the Area Under the Curve (AUC) increased only slightly (+ 0.0004) after removal of race and gender. This would mean that while gender and race were statistically significant, they were not as strong of predictors as date/time and district when classifying an outcome of either citation or warning. The AUC for the model that focused date/time and district was 0.6289. Which means that 63% of the citation/warning outcome is predictable using day of the month, time of day, progression of week, and district. The other 37% of the outcome is due to other factors not captured in this model. These factors could include offense type, violator's behavior, and officer variables. While not a particularly strong predictive model, the model helps understand the effects of time and location.
 
 ```{r}
-#| eval: false
 #| message: false
 #| warning: false
 #| include: false
