@@ -60,13 +60,13 @@ While understanding local crime is the goal of this project, the data acquired o
 
 ## Cleaning and Transformation
 
-To address questions related to gender, the data needed to be standardized and correctly categorized. Column names needed to be consistent across the three datasets to merge. Gender was used over Sex. Next the column data would be transformed to consistent labels, e.g. Male, Female, and Other/Unknown. Total proportion for Gender was examined, to verify that other/ unknown class could be removed without...
+In cases where applicable, duplicate and null values were removed. To address questions related to gender, the data needed to be standardized and correctly categorized. Column names needed to be consistent across the three datasets to merge. Gender was used over Sex. Next the column data would be transformed to consistent labels, e.g. Male, Female, and Other/Unknown. Records that included unverified or unknown were also removed in cases where they did not contribute to the overall analysis. To ensure these removals would not corrupt the analysis, proportions were examined to ensure its removal would not effect the overall results, typically less than 2% proportion. Depending on the research question, determined which datasets were merged.
 
 # [Research Questions]{.underline}
 
 1)  Is there an association between gender and warnings?
 
-2)  Are there other factors that determine if someone gets out of a "ticket"? OR Are you more likely to get a ticket at the end of the month (some believe that police officers have a monthly quota)
+2)  How does time and location factor into the odds of a Citation?
 
 3)  How do enforcement outcomes vary across districts and demographic groups?
 
