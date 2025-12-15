@@ -31,7 +31,7 @@ In 2023, there were over 30,000 arrests and close to 65,000 citations in Fairfax
 
 ## Goals/ Objectives
 
-In order to provide relevant and insightful crime information, several different visualization methods were applied to help easily interpret and compare data. Statistical learning techniques were utilized to help understand statistic significantly factors and associations between variables. Since the data utilized for this project is largely categorical the project focuses on techniques such as Chi-Squared Test, *Logistic Regression, Decision Trees and Random Forest*.
+Provide relevant, understandable, and insightful crime patterns using several different visualization and statistical methods. Deliver clear and concise graphs and charts that help readers easily interpret and compare data. Utilize statistical learning techniques to examine data, interpret statistical significant factors, and understand associations between variables. Since the data utilized for this project is largely categorical this project focuses on techniques such as Chi-Squared Test and Logistic Regression.
 
 # [Data]{.underline}
 
