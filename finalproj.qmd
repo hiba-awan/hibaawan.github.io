@@ -429,9 +429,358 @@ Next examining the **Top 10 Citations**
 
 **Warning Versus Citation** Next an examination of warning versus citation will be observed... This will help understand what different factors could play into getting a warning or a citation.
 
-#### **Question 2: ...**
+#### **Question 2: How Does Time and Location Factor into the Odds of a Citations?**
 
-...
+For this research question, variables such as time of day, progression of week, day of month, and district are examined to determine if those variable influence an officer's decision to issue a warning or citation. For this question, arrests are excluded since it is assumed a higher threshold of danger is imminent and would allow for less use of officers' discretion.
+
+First, to explore the likelihood of getting a citation versus a warning (outcome of a violation), the citation rate is calculated, using the following equation.
+
+$$
+\begin{align*}
+Citation Rate = \frac{\text{Number of Citations}}{\text{Total Incidents (Warnings + Citations)}}
+\end{align*}
+$$
+
+Then, a heatmap is generated to see if there are any patterns that would indicate trends over hours of the day and throughout the month.
+
+```{r}
+#| label: heatmap
+#| message: false
+#| warning: false
+#| include: false
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(scales)
+library(viridis)
+library(tidyr)
+
+combined_wc_mf = combined_wc_mf %>%
+  mutate(
+    Hour = hour(Time),
+    Minute = minute(Time),
+    Time_of_day = case_when(
+      Hour >= 5 & Hour < 10 ~ "Morning Rush (0500-1000)",
+      Hour >= 10 & Hour < 15 ~ "Daytime (1000-1500)",
+      Hour >= 15 & Hour < 19 ~ "Evening Rush (1500-1900)",
+      TRUE ~ "Night/Late Night (1900-0500)"
+    ) 
+  )
+
+stop_count_by_day = combined_wc_mf %>%
+  group_by(DayOfMonth) %>%
+  summarise(Stop_Count = n()) %>%
+  ungroup()
+
+# Make interactive heatmap using plotly
+library(plotly)
+
+heatmap_days = combined_wc_mf %>%
+  group_by(DayOfMonth, Hour) %>%
+  summarise(
+    TotalOutcomes = n(),
+    TotalCitations = sum(BinaryOutcome == 0, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    Citation_Rate = TotalCitations/TotalOutcomes
+  ) %>%
+  tidyr::complete(DayOfMonth, Hour, fill = list(TotalOutcomes = 0, Citation_Rate = 0))
+
+# label for x-axis
+all_hours = as.character(0:23)
+
+# Convert to factor
+heatmap_days$Hour = factor(heatmap_days$Hour)
+heatmap_days$DayOfMonth = factor(heatmap_days$DayOfMonth)
+
+# Text for interactive part
+heatmap_days = heatmap_days %>%
+  mutate(text = paste0("Hour: ", Hour, "\n", "Day: ", DayOfMonth, "\n", "Citation Rate: ",round(Citation_Rate,2)))
+
+## trying to get all axes
+plot_heatmap_discrete_axes = ggplot(
+  heatmap_days, 
+  aes(x = Hour, y = DayOfMonth, fill = Citation_Rate, text = text)
+) +
+  geom_tile(aes(width = 1, height = 1), color = "white", linewidth = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    direction = -1,
+    name = "Citation Rate",
+    labels = scales::percent
+  ) +
+  scale_x_discrete(name = "Hour of Day (0 = Midnight, 12 = Noon)", drop = FALSE) + 
+  scale_y_discrete(drop = FALSE) + 
+  labs(
+    title = "Citation Rate by Day of Month and Hour of Day",
+    subtitle = "Higher intensity (darker color) indicates a higher proportion of Citations",
+    y = "Day of the Month"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(vjust = 0.1, hjust = 0.1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+ggplotly(plot_heatmap_discrete_axes, tooltip = "text")
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+plot_heatmap_discrete_axes = ggplot(
+  heatmap_days, 
+  aes(x = Hour, y = DayOfMonth, fill = Citation_Rate, text = text)
+) +
+  geom_tile(aes(width = 1, height = 1), color = "white", linewidth = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    direction = -1,
+    name = "Citation Rate",
+    labels = scales::percent
+  ) +
+  scale_x_discrete(name = "Hour of Day (0 = Midnight, 12 = Noon)", drop = FALSE) + 
+  scale_y_discrete(drop = FALSE) + 
+  labs(
+    title = "Citation Rate by Day of Month and Hour of Day",
+    subtitle = "Higher intensity (darker color) indicates a higher proportion of Citations",
+    y = "Day of the Month"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(vjust = 0.1, hjust = 0.1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+plot_heatmap_discrete_axes
+```
+
+The higher intensity or darker color areas represent a higher citation rate. During the hours of 0500-0600 (24-hour clock) the citation rate is much higher across most days of the month. This would imply that officers are less likely to issue warnings between 5am and 6am. This time also aligns with morning rush hour and higher volumes of traffic are expected. However, the same pattern of higher citation rates are not observed during evening rush hour. The heatmap also does not show higher intensities during the end of the month. Which is what we would expect to see if officers were attempting to meet monthly ticket quotas at the end of the month.
+
+To visualize citation and warnings geospatially, a map is generated using the latitude and longitude associated to each record. While this map is helpful for understanding concentrations of citations and warning. It is misleading in show the most dominate outcomes. This is likely due to the quantity of data points overlaid on one another; however, since it is interactive areas can be zoomed in on for further insight.
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+
+
+Arrest2023 <- read_csv("2023_arrest_data.csv", 
+                       col_types = cols(ArresteeNumber = col_skip(), 
+                                        ArrestDate = col_date(format = "%m/%d/%Y"), 
+                                        ArrestTime = col_character(), WEB_ADDRESS = col_skip(), 
+                                        PHONE_NUMBER = col_skip(), NAME = col_skip()))
+
+## Remove any outliers by setting min/max lat and long.
+min_lat = 38.6
+max_lat = 39.0
+min_lon = -77.6
+max_lon = -77.0
+
+## Using all data but excluding any coordinates that are not within coordinates
+arrest_data_clean = Arrest2023 %>%
+  filter(
+    Latitude >= min_lat,
+    Latitude <= max_lat,
+    Longitude >= min_lon,
+    Longitude <= max_lon
+  )
+
+## Include district boundaries by reading in shape file downloaded from Fairfax County site
+district_boundaries = st_read("Supervisor_Districts/Supervisor_Districts.shp")
+
+## Transform to WGS84 projection to match basemap within leaflet
+if (st_crs(district_boundaries)$epsg != 4326) {
+  district_boundaries = st_transform(district_boundaries, 4326)
+}
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+## Using leaflet to map the Outcomes across Fairfax County
+
+pal = colorFactor(
+  palette = c("red", "gold1"), 
+  domain = combined_wc_mf$outcome, 
+  levels = c("Citation", "Warning") 
+)
+
+leaflet() %>%
+  addProviderTiles(providers$OpenStreetMap) %>%
+  addPolygons(
+    data = district_boundaries,
+    fillOpacity = 0.5,
+    color = "black",
+    weight = 1,
+    popup = ~paste("District:", DISTRICT)
+  ) %>%
+  addCircleMarkers(
+    data = combined_wc_mf,
+    lng = ~Longitude,
+    lat = ~Latitude,
+    radius = 2.5,
+    color = ~pal(outcome),
+    stroke = FALSE,
+    fillOpacity = 0.4,
+    popup = ~paste(
+      "Outcome: ", outcome, "<br>")
+  )
+```
+
+Next, through the use of Logistic Regression, the odds ratios is examined between citations and warnings for Fairfax county. Predictor variables, time of day, week progression, day of month, district are used to predict the probability that a warning or citation will occur. The results provide an odd ratios at the intercept of 0.532 which would indicate that the odds of getting a warning are less than 50/50. In other words, if pulled over for a traffic violation, it is not a flip of a coin whether you get a ticket or not. Your chance of getting a citation is higher according to the intercept generated through this logistic regression model. Additionally, the model showed factors that did increased the likelihood of getting a warning occurred in certain districts (Mount Vernon, Mason, and Franconia) and progression of the week influences leniency. In weekly progression, an odds ratio of 1.595 shows that as the week progresses from Monday to Sunday, the odds of recieving a warning increase by 59.5 %. Alternatively, factors such as time of day and day of the month showed an increased likelihood of a citation. Using the below graph, the top five odds ratio for citation and bottom five odds ratio for warnings are depicted.
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+library(dplyr)
+library(lubridate)
+library(caTools)
+library(pROC) 
+
+#Add HourOfDay
+combined_wc_mf = combined_wc_mf %>%
+  mutate(
+    HourOfDay = hour(Time))
+
+combined_wc_mf = combined_wc_mf %>%
+  mutate(
+    DayOfWeek = factor(
+      wday(ViolationDate, label = TRUE, week_start = 1),
+      levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")))
+
+model_columns_chrono = c(
+  "BinaryOutcome",
+  "HourOfDay",
+  "DayOfMonth",
+  "DayOfWeek",
+  "District"
+)
+
+data_for_modeling = combined_wc_mf %>%
+  select(all_of(model_columns_chrono)) %>%
+  mutate(across(c(HourOfDay, DayOfMonth, DayOfWeek, District), as.factor)) %>%
+  mutate(BinaryOutcome = factor(BinaryOutcome, levels = c(0, 1))) %>%
+  na.omit()
+
+data_for_modeling
+
+set.seed(42)
+
+sample_split_chrono = sample.split(
+  Y = data_for_modeling$BinaryOutcome,
+  SplitRatio = 0.70
+)
+
+train_set_chrono = subset(data_for_modeling, sample_split_chrono == TRUE)
+test_set_chrono = subset(data_for_modeling, sample_split_chrono == FALSE)
+
+logistic_model_chrono = glm(
+  formula = BinaryOutcome ~ .,
+  data = train_set_chrono,
+  family = binomial(link = "logit")
+)
+
+odds_ratio_chrono = exp(coef(logistic_model_chrono))
+
+odds_ratio_df_chrono = data.frame(
+  Variable = names(odds_ratio_chrono),
+  OddsRatio = odds_ratio_chrono
+)
+
+print(odds_ratio_df_chrono %>%
+        filter(Variable != "(Intercept)") %>%
+        arrange(OddsRatio) %>%
+        head(30))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+## new visual
+top_citation_chrono = odds_ratio_df_chrono %>%
+  filter(Variable != "(Intercept)") %>%
+  arrange(OddsRatio) %>%
+  head(5) %>%
+  mutate(Effect = "Stronger Citation Likelihood")
+
+top_warning_chrono = odds_ratio_df_chrono %>%
+  filter(Variable != "(Intercept)") %>%
+  arrange(desc(OddsRatio)) %>%
+  head(5) %>%
+  mutate(Effect = "Stronger Warning Likelihood")
+
+plot_data_chrono = bind_rows(top_citation_chrono, top_warning_chrono)
+
+plot_data_chrono = plot_data_chrono %>%
+  mutate(
+    Variable = gsub("HourOfDay", "Hr:", Variable),
+    Variable = gsub("DayOfMonth", "Day:", Variable),
+    Variable = gsub("DayOfWeek", "Week:", Variable),
+    Variable = gsub("District", "Dist:", Variable)
+  )
+
+odds_ratio_plot_chrono = ggplot(plot_data_chrono, aes(x = Variable, y = OddsRatio, fill = Effect)) +
+  geom_bar(stat = "identity", position = "identity") +
+  geom_hline(yintercept = 1.0, linetype = "dashed", color = "black", linewidth = 1) +
+  scale_y_continuous(
+    trans = 'log2', 
+    breaks = c(0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 2.5),
+    labels = c("0.3", "0.5", "0.7", "1.0", "1.5", "2.0", "2.5")
+  ) +
+  labs(
+    title = "Odds Ratios of Date and Location Factors on Issuing a Warning",
+    subtitle = "Based on Hour, Day of Month, Day of Week, and District",
+    x = "Predictor Variable",
+    y = "Odds Ratio (Warning vs. Citation)",
+    fill = "Enforcement Discretion"
+  ) +
+  scale_fill_manual(values = c("Stronger Citation Likelihood" = "coral3", "Stronger Warning Likelihood" = "gold1")) +
+  
+  # Flip coordinates for a horizontal bar chart (easier to read labels)
+  coord_flip() +
+  theme_grey(base_size = 11)
+
+odds_ratio_plot_chrono
+```
+
+
+Gender and race were originally included but removed to isolate only time and space variables. Additionally, after running both models, the Area Under the Curve (AUC) increased only slightly (+ 0.0004) after removal of race and gender. This would mean that while gender and race were statistically significant, they were not as strong of predictors as date/time and district when classifying an outcome of either citation or warning. The AUC for the model that focused date/time and district was 0.6289. Which means that 63% of the citation/warning outcome is predictable using day of the month, time of day, progression of week, and district. The other 37% of the outcome is due to other factors not captured in this model. These factors could include offense type, violator's behavior, and officer variables. While not a particularly strong predictive model, the model helps understand the effects of time and location.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+## Calculate AUC
+library(pROC)
+
+probability_chrono = predict(
+  logistic_model_chrono,
+  newdata = test_set_chrono,
+  type = "response"
+)
+
+roc_obj_chrono = roc(
+  response = test_set_chrono$BinaryOutcome,
+  predictor = probability_chrono,
+  levels = c(0,1) 
+)
+auc_value_chrono = auc(roc_obj_chrono)
+
+round(auc_value_chrono, 4)
+
+```
 
 #### **Question 3: How do enforcement outcomes vary across districts and demographic groups?**
 
@@ -444,7 +793,7 @@ combined_data <- read.csv("combined_crime_data.csv")
 library(ggplot2)
 
 ggplot(combined_data, aes(x = Outcome, fill = District)) +
-  geom_bar(position = "stack") + # change to "fill" for proportions
+  geom_bar(position = "fill") + # change to "fill" for proportions
   coord_flip() +
   labs(
     title = "Enforcement Outcomes by District",
@@ -470,7 +819,7 @@ For the chi-square implementation, a contingency table for the district and outc
 table(combined_data$District, combined_data$Outcome)
 ```
 
-From both the visualization above and the table output, we can see that citations are the most common outcome among the districts. However, this won't affect the test as chi-square allows unequal margin totals. The other outcomes, arrests and warnings, vary substantially in volume across districts. Some districts (like Sully, Springfield, Providence) show particularly high citation counts, while others (Braddock, Dranesville) show lower overall enforcement volumes.
+From both the visualization above and the table output, we can see that citations are the most common outcome among the districts. However, this won't affect the test as chi-square allows unequal margin totals and, in this case, is testing the distribution of outcomes across districts. The other outcomes, arrests and warnings, vary substantially in volume across districts. Some districts (like Sully, Springfield, Providence) show particularly high citation counts, while others (Braddock, Dranesville) show lower overall enforcement volumes.
 
 Then the test is performed:
 
@@ -479,7 +828,7 @@ Then the test is performed:
 chisq.test(table(combined_data$District, combined_data$Outcome))
 ```
 
-The chi-square statistic is extremely large, which indicates a substantial deviation between observed and expected counts. The p-value is also low enough that we reject the null hypothesis. Therefore, there is a statistically significant association between district and enforcement outcome.
+The chi-square statistic is extremely large, which indicates a substantial deviation between observed and expected counts. The p-value is also low enough that we reject the null hypothesis. This means enforcement outcomes (arrests, citations, and warnings) are not distributed uniformly across police districts. Therefore, there is a statistically significant association between district and enforcement outcome. 
 
 From this, we can see that enforcement severity varies by district and district-level patterns justify further modeling.
 
@@ -496,7 +845,7 @@ demo_long <- combined_data %>%
   )
 
 ggplot(demo_long, aes(x = Outcome, fill = group)) +
-  geom_bar(position = "stack") +
+  geom_bar(position = "fill") +
   facet_wrap(~ variable, scales = "free_x") +
   coord_flip() +
   labs(
@@ -511,10 +860,12 @@ ggplot(demo_long, aes(x = Outcome, fill = group)) +
 
 ```
 
+Doing some pre-analysis on race, ethnicity, and gender shows that exploring the distribution of enforcement outcomes across demographic variables is worth pursuing as well.
+
 In order to test both the district and demographic variables affects, below we perform logistic regression:
 
 ```{r}
-#| include: false
+#| echo: false
 library(nnet)
 
 combined_data$Outcome  <- factor(combined_data$Outcome)
@@ -526,6 +877,16 @@ combined_data$Ethnicity <- factor(combined_data$Ethnicity)
 model <- multinom(Outcome ~ Race + Gender + District + Ethnicity, data = combined_data)
 
 ```
+
+The results below are done with arrest as the reference outcome, so the coefficients are relative to the arrest outcome.
+
+*Race:* In terms of reference A (asian), Black individuals have lower odds of receiving a citation or warning vs arrest. Not to the same extent, but the same applies to white individuals as well.
+
+*Gender:* In terms of reference F (female), males have lower odds of receiving a citations or warning vs arrest.
+
+*Ethnicity:* Variable only really indicates hispanic or non-hispanic, so in terms of this, hispanic individuals have lower odds of receiving a citation or ticket vs arrest.
+
+*District:* Mason, Providence, Franconia, Hunter Mill, and Sully individuals have a lower odds of receiving citations/warnings than arrests. 
 
 ```{r}
 #| echo: false

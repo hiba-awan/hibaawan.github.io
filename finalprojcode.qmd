@@ -4,4 +4,287 @@ format: html
 editor: visual
 ---
 
-placeholder for future project
+## Question 1
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(leaflet)
+library(usmap)
+library(sf)
+library(readr)
+library(scales)
+library(tidyr)
+library(lubridate)
+
+# Read in the raw data for Warnings and Citations
+warnings = read_csv("2023_warning_data.csv", 
+                         col_types = cols(Warnings_Date = col_date(format = "%m/%d/%Y"), 
+                                          WEB_ADDRESS = col_skip(), PHONE_NUMBER = col_skip(), 
+                                          NAME = col_skip()))
+
+citations = read_csv("2023_citation_data.csv", 
+                                col_types = cols(Date = col_date(format = "%m/%d/%Y"), 
+                                                 WEB_ADDRESS = col_skip(), PHONE_NUMBER = col_skip(), 
+                                                 NAME = col_skip()))
+
+# Rename some columns
+citations = citations %>%
+  rename(ViolationDate = Date)
+
+# change Gender to sex in warnings and change date column name
+warnings = warnings %>%
+  rename(Sex = Gender)
+
+warnings = warnings %>%
+  rename(ViolationDate = Warnings_Date)
+
+# Adjust Citations and prepare for Merge
+# Assumption that ID is the officer's ID
+citations_processed = citations %>%
+  mutate(
+    outcome = "Citation",
+    Gender = case_when(
+      Sex == "M" ~ "Male",
+      Sex == "F" ~ "Female",
+      TRUE ~ "Other/Unknown"
+    ),
+    Year = year(ViolationDate),
+    Month = month(ViolationDate),
+    DayOfMonth = day(ViolationDate),
+    Time = parse_date_time(Time, "HM"),
+    data_type = "Citation"
+  ) %>%
+  select(
+    outcome, Gender, Year, Month, DayOfMonth, Time, Offense_Description = Charge,
+    District = DISTRICT, Race, Ethnicity, Latitude, Longitude, OfficerID = ID, data_type
+  )
+
+# Adjust Warnings and prepare for Merge
+warnings_processed = warnings %>%
+  mutate(
+    outcome = "Warning",
+    Gender = case_when(
+      Sex == "M" ~ "Male",
+      Sex == "F" ~ "Female",
+      TRUE ~ "Other/Unknown"
+    ),
+    Year = year(ViolationDate),
+    Month = month(ViolationDate),
+    DayOfMonth = day(ViolationDate),
+    Time = parse_date_time(Time, "HM"),
+    data_type = "Warning"
+  ) %>%
+  select(
+    outcome, Gender, Year, Month, DayOfMonth, Time, Offense_Description, District = DISTRICT, Race, 
+    Ethnicity, Latitude = Lat, Longitude = Long, OfficerID = Officer_ID, data_type
+  )
+
+# Combined for ultimate Data coordination!
+combined_wc = bind_rows(citations_processed, warnings_processed)
+
+# Add ultimate binary outcome! 0 = Citation, 1 = Warning/ Got out of ticket
+combined_wc = combined_wc %>%
+  mutate(
+    BinaryOutcome = ifelse(outcome == "Warning", 1,0)
+  )
+
+## Change to Title Case for District Names
+combined_wc$District = tools::toTitleCase(tolower(combined_wc$District))
+
+## Examining Unverified data
+## After examination, unverified only makes up 0.0143 or 1.43% of the data set, so we will remove
+## because it is a very small portion of the total proportion. 
+# combined_wc %>%
+#  count(District) %>%
+#  mutate(Proportion = n / sum(n)) %>%
+#  arrange(desc(n))
+
+## Filter out Unverified and NA
+combined_wc = combined_wc %>%
+  filter(District != "Unverified")
+
+combined_wc = combined_wc %>%
+  filter(!is.na(District))
+
+## Filter out Other/Unknown Gender
+combined_wc_mf = combined_wc %>%
+  filter(Gender != "Other/Unknown")
+
+
+## Stacked Bar chart for Outcome and Gender
+ggplot(combined_wc_mf, aes(x = outcome, fill = Gender)) +
+  geom_bar() +
+  labs(
+    title = "Count of Outcomes by Gender",
+    x = "Outcome Type",
+    y = "# of Incident",
+    fill = "Gender"
+  ) + theme_gray() + theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_manual(values = c("Female" = "lightpink2", "Male" = "lightsteelblue"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+## Now for some visuals: Gender Chart
+## Examining the proportion of stops resulting in a Warning Vs Citation
+## the Warning rate is the proportion of incidents that are warnings.
+gender_warning_rate = combined_wc_mf %>%
+  group_by(Gender) %>%
+  summarise(
+    Total_Incidents = n(),
+    Warning_Rate = mean(BinaryOutcome)
+  ) %>%
+  ungroup()
+
+gender_chart = ggplot(gender_warning_rate,
+                      aes(x = Gender, y = Warning_Rate, fill = Gender)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = scales::percent(Warning_Rate, accuracy = 0.1)),
+            vjust = -0.5, size = 5) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, max(gender_warning_rate$Warning_Rate) * 1.1)) +
+  labs(
+    title = "Warning Rate by Gender",
+    subtitle = "Proportion of stops resulting in a Warning (vs Citation)",
+    x = "Gender",
+    y = "Warning Rate"
+  ) + theme_gray() + theme(plot.title = element_text(hjust = 0.5)) + theme(plot.subtitle = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c("Female" = "lightpink2", "Male" = "lightsteelblue"))
+
+gender_chart
+```
+
+```{r}
+#| warning: false
+#| include: false
+## Now the Chi-Squared Test starting with the Contingency Table
+contingency_tbl = combined_wc_mf %>%
+  filter(Gender %in% c("Male", "Female")) %>%
+  select(Gender, BinaryOutcome) %>%
+  table()
+
+chi_sq_results = chisq.test(contingency_tbl)
+
+expected_counts = chi_sq_results$expected
+
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Heatmap
+library(pheatmap)
+# observed count
+observed_counts = chi_sq_results$observed
+# Calculated expected above.
+# Calculate residuals
+pearson_residuals = chi_sq_results$residuals
+
+# Calculate contributions to chi-square statistic
+contributions = (observed_counts - expected_counts)^2 / expected_counts
+
+total_chi_square = chi_sq_results$statistic
+
+percentage_contributions = 100 * contributions / total_chi_square
+colnames(percentage_contributions) = c("Citation", "Warning")
+pheatmap(percentage_contributions,
+         display_numbers = TRUE,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         main = "Percentage Contribution to Chi-Square Statistic",
+         fontsize = 11,
+         fontsize_row = 11,
+         fontsize_col = 11,
+         fontsize_number = 15
+         )
+
+```
+
+## Question 2:
+
+...
+
+## Question 3:
+
+```{r}
+#| echo: false
+combined_data <- read.csv("combined_crime_data.csv")
+
+library(ggplot2)
+
+ggplot(combined_data, aes(x = Outcome, fill = District)) +
+  geom_bar(position = "fill") + # change to "fill" for proportions
+  coord_flip() +
+  labs(
+    title = "Enforcement Outcomes by District",
+    x = "Outcome",
+    y = "Count",
+    fill = "District"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#| echo: false
+table(combined_data$District, combined_data$Outcome)
+```
+
+```{r}
+#| echo: false
+chisq.test(table(combined_data$District, combined_data$Outcome))
+```
+
+```{r}
+#| echo: false
+library(dplyr)
+library(tidyr)
+
+demo_long <- combined_data %>%
+  pivot_longer(
+    cols = c(Gender, Race, Ethnicity),
+    names_to = "variable",
+    values_to = "group"
+  )
+
+ggplot(demo_long, aes(x = Outcome, fill = group)) +
+  geom_bar(position = "fill") +
+  facet_wrap(~ variable, scales = "free_x") +
+  coord_flip() +
+  labs(
+    title = "Enforcement Outcomes by Demographics",
+    x = "Outcome",
+    y = "Count",
+    fill = "Demographic Group"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
+```{r}
+#| include: false
+library(nnet)
+
+combined_data$Outcome  <- factor(combined_data$Outcome)
+combined_data$Race     <- factor(combined_data$Race)
+combined_data$Gender   <- factor(combined_data$Gender)
+combined_data$District <- factor(combined_data$District)
+combined_data$Ethnicity <- factor(combined_data$Ethnicity)
+
+model <- multinom(Outcome ~ Race + Gender + District + Ethnicity, data = combined_data)
+
+```
+
+```{r}
+#| echo: false
+summary(model)
+```
+
+
