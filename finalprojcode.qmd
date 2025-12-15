@@ -7,7 +7,7 @@ editor: visual
 ## Question 1
 
 ```{r}
-#| echo: false
+#| echo: true
 #| warning: false
 library(tidyverse)
 library(ggplot2)
@@ -128,7 +128,7 @@ ggplot(combined_wc_mf, aes(x = outcome, fill = Gender)) +
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 #| warning: false
 ## Now for some visuals: Gender Chart
 ## Examining the proportion of stops resulting in a Warning Vs Citation
@@ -159,8 +159,8 @@ gender_chart
 ```
 
 ```{r}
+#| echo: true
 #| warning: false
-#| include: false
 ## Now the Chi-Squared Test starting with the Contingency Table
 contingency_tbl = combined_wc_mf %>%
   filter(Gender %in% c("Male", "Female")) %>%
@@ -174,7 +174,7 @@ expected_counts = chi_sq_results$expected
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 #| message: false
 #| warning: false
 # Heatmap
@@ -212,7 +212,7 @@ pheatmap(percentage_contributions,
 ## Question 3:
 
 ```{r}
-#| echo: false
+#| echo: true
 combined_data <- read.csv("combined_crime_data.csv")
 
 library(ggplot2)
@@ -231,17 +231,17 @@ ggplot(combined_data, aes(x = Outcome, fill = District)) +
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 table(combined_data$District, combined_data$Outcome)
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 chisq.test(table(combined_data$District, combined_data$Outcome))
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 library(dplyr)
 library(tidyr)
 
@@ -269,7 +269,7 @@ ggplot(demo_long, aes(x = Outcome, fill = group)) +
 ```
 
 ```{r}
-#| include: false
+#| echo: true
 library(nnet)
 
 combined_data$Outcome  <- factor(combined_data$Outcome)
@@ -283,7 +283,7 @@ model <- multinom(Outcome ~ Race + Gender + District + Ethnicity, data = combine
 ```
 
 ```{r}
-#| echo: false
+#| echo: true
 summary(model)
 ```
 
