@@ -14,6 +14,15 @@ editor: visual
 
 # [Abstract]{.underline}
 
+This research project investigates Fairfax County Police Department (FCPD) data to derive law enforcement and crime patterns. The object of this project is to analyze and interpret the publicly available data for arrest, citations, and warning through visualization and statistical techniques. This helps to quantify and visualize crime and law enforcement trends throughout Fairfax County for 2023.
+
+The methods used in this project involved extensive data cleaning and feature creation to calculate and visualize outcome frequencies, as well citation and warning rates across various temporal and geospatial variables. Visual illustrations were generated using R, showcasing these rates over time. Statistical analysis included Chi-Squared Test to access association and a Binary Logistic Regression models to determine statistical significance and effects of factors like gender, time, and location to determine law enforcement outcome. The model provided odds ratios for variables such as hour of day and day of month to quantify the outcome probability for citation or warning.
+
+Key findings showed significant temporal influence in citation outcome. The analysis showed higher citation odds during morning rush hour and lower citation odds in certain districts. Further emphasize the importance of time and space for understanding law enforcement trends and highlights their essential role for applying predictive methods.
+
+Overall this project provides data-driven insight into FCPD law enforcement and crime patterns and how they are strongly influenced by temporal and geospatial variables. For future analyses, these findings coupled with more structured data on the exact offense type would very likely provide greater predictability and deeper understanding of law enforcement outcomes.
+
+
 # [Introduction & Background]{.underline}
 
 ## Motivation/ Purpose
